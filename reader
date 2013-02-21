@@ -1,0 +1,35 @@
+#! /usr/bin/env ruby
+
+def debug(info)
+  puts "DEBUG: #{info.is_a?(String) ? info : info.inspect}"
+end
+
+ram_source = '/Volumes/RamDisk/sr'
+ext_source = '/Volumes/RamDisk/new'
+#hd_source = '/Users/chenronghua/workspace/scarecrow-rules' 
+hd_source = '/Users/chenronghua/workspace/front' 
+
+source = ARGV[0]
+source = ram_source if source == 'ram'
+source = ext_source if source == 'ext'
+source = hd_source if source == 'hd'
+
+Dir.chdir(source)
+debug "git repo: #{source}"
+
+def readSHA(target, sha)
+  `git checkout #{sha}`
+  return IO.read(target)
+end
+
+sha = ARGV[1]
+target = ARGV[2]
+
+start_time = Time.now.to_f
+
+puts readSHA(target, sha)
+
+
+end_time = Time.now.to_f
+
+debug "finished in #{end_time - start_time} seconds"

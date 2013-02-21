@@ -1,20 +1,26 @@
 #! /usr/bin/env ruby
 
-ram_source = '/Volumes/RamDisk/sr'
-hd_source = '/Users/chenronghua/workspace/scarecrow-rules' 
-
-Dir.chdir(ARGV[0] == 'ram' ? ram_source : hd_source)
-
-def debug(data)
-  puts "DEBUG: #{data.inspect}"
+def debug(info)
+  puts "DEBUG: #{info.is_a?(String) ? info : info.inspect}"
 end
 
+ram_source = '/Volumes/RamDisk/sr'
+ext_source = '/Volumes/RamDisk/new'
+#hd_source = '/Users/chenronghua/workspace/scarecrow-rules' 
+hd_source = '/Users/chenronghua/workspace/front' 
+
+source = ARGV[0]
+source = ram_source if source == 'ram'
+source = ext_source if source == 'ext'
+source = hd_source if source == 'hd'
+
+Dir.chdir(source)
+debug "git repo: #{source}"
+
 def readSHA(target, sha, type=nil)
-  return `git cat-file -p #{sha}` if target.nil? || target.length < 1
 
   type = type || `git cat-file -t #{sha}`.chomp
-  type.inspect
-  debug sha
+  debug "target:#{target}, sha: #{sha}, type: #{type}"
 
   if type == 'commit'
     commit = `git cat-file -p #{sha}`
@@ -22,9 +28,21 @@ def readSHA(target, sha, type=nil)
     return readSHA(target, tree, 'tree')
   elsif type == 'tree'
     tree = `git cat-file -p #{sha}`
+    return tree if target.nil? || target.empty?
+    t = target[0]
+    #if t == '*'
+    #  return {}.tap do |s|
+    #    tree.each_line do |l|
+    #      info = l.split(/\s+/)
+    #      if info[1] == 'blob'
+    #        s[info[3]] = readSHA(nil, info[2], 'blob')
+    #      end
+    #    end
+    #  end
+    #end
     tree.each_line do |l|
       info = l.split(/\s+/)
-      if target[0] == info[3]
+      if t == info[3]
         # tree
         if info[1] == 'tree'
           return readSHA(target[1..-1], info[2], 'tree')
@@ -34,11 +52,12 @@ def readSHA(target, sha, type=nil)
         end
       end
     end
-  elsif type == 'blob'
-    data = `git cat-file -p #{sha}`
-  end
+    raise RuntimeError.new("no object found for #{t}")
 
-  return data
+  elsif type == 'blob'
+    return `git cat-file -p #{sha}` if target.nil? || target.empty?
+    raise RuntimeError.new("can not found objects under #{target[0]}")
+  end
 end
 
 
