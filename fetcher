@@ -1,0 +1,55 @@
+#! /usr/bin/env ruby
+
+ram_source = '/Volumes/RamDisk/sr'
+hd_source = '/Users/chenronghua/workspace/scarecrow-rules' 
+
+Dir.chdir(ARGV[0] == 'ram' ? ram_source : hd_source)
+
+def debug(data)
+  puts "DEBUG: #{data.inspect}"
+end
+
+def readSHA(target, sha, type=nil)
+  return `git cat-file -p #{sha}` if target.nil? || target.length < 1
+
+  type = type || `git cat-file -t #{sha}`.chomp
+  type.inspect
+  debug sha
+
+  if type == 'commit'
+    commit = `git cat-file -p #{sha}`
+    tree = commit.split(/\s+/)[1]
+    return readSHA(target, tree, 'tree')
+  elsif type == 'tree'
+    tree = `git cat-file -p #{sha}`
+    tree.each_line do |l|
+      info = l.split(/\s+/)
+      if target[0] == info[3]
+        # tree
+        if info[1] == 'tree'
+          return readSHA(target[1..-1], info[2], 'tree')
+        # blob
+        else
+          return readSHA(target[1..-1], info[2], 'blob')
+        end
+      end
+    end
+  elsif type == 'blob'
+    data = `git cat-file -p #{sha}`
+  end
+
+  return data
+end
+
+
+sha = ARGV[1]
+target = ARGV[2]
+
+start_time = Time.now.to_f
+
+puts readSHA(target.split("/"), sha)
+
+
+end_time = Time.now.to_f
+
+debug "finished in #{end_time - start_time} seconds"
