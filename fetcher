@@ -27,36 +27,16 @@ def readSHA(target, sha, type=nil)
     tree = commit.split(/\s+/)[1]
     return readSHA(target, tree, 'tree')
   elsif type == 'tree'
-    tree = `git cat-file -p #{sha}`
-    return tree if target.nil? || target.empty?
-    t = target[0]
-    #if t == '*'
-    #  return {}.tap do |s|
-    #    tree.each_line do |l|
-    #      info = l.split(/\s+/)
-    #      if info[1] == 'blob'
-    #        s[info[3]] = readSHA(nil, info[2], 'blob')
-    #      end
-    #    end
-    #  end
-    #end
-    tree.each_line do |l|
-      info = l.split(/\s+/)
-      if t == info[3]
-        # tree
-        if info[1] == 'tree'
-          return readSHA(target[1..-1], info[2], 'tree')
-        # blob
-        else
-          return readSHA(target[1..-1], info[2], 'blob')
-        end
-      end
-    end
+    tree = `git ls-tree #{sha} #{target}`
+    raise RuntimeError.new("no object found for #{target}") if tree.empty?
+    # tree
+    return tree if tree.split(/\n/).length > 1
+    # blob
+    info = tree.split(/\s+/)
+    return readSHA(nil, info[2], info[1])
     raise RuntimeError.new("no object found for #{t}")
-
   elsif type == 'blob'
-    return `git cat-file -p #{sha}` if target.nil? || target.empty?
-    raise RuntimeError.new("can not found objects under #{target[0]}")
+    return `git cat-file -p #{sha}`
   end
 end
 
@@ -66,7 +46,7 @@ target = ARGV[2]
 
 start_time = Time.now.to_f
 
-puts readSHA(target.split("/"), sha)
+puts readSHA(target, sha)
 
 
 end_time = Time.now.to_f
