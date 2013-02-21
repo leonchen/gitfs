@@ -1,0 +1,89 @@
+#! /usr/bin/env node
+var exec = require('child_process').exec
+
+function debug(info) {
+  console.log("DEBUG: ", info);
+}
+
+var ram_source = '/Volumes/RamDisk/sr';
+var ext_source = '/Volumes/RamDisk/new';
+var hd_source = '/Users/chenronghua/workspace/scarecrow-rules'; 
+//var hd_source = '/Users/chenronghua/workspace/front' 
+
+console.log(process.argv);
+
+var source = process.argv[2];
+if (source == 'ram') source = ram_source;
+if (source == 'ext') source = ext_source;
+if (source == 'hd') source = hd_source;
+
+function readSHA(target, sha, type, cb) {
+  if (type instanceof Function) {
+    cb = type;
+    type = null;
+  }
+
+  getType(sha, type, function (err, type) {
+    if (err) return cb(err);
+    debug("target:"+target+", sha:"+sha+", type:"+type);
+    if (type == 'commit') {
+      parseCommit(sha, function (error, treeSHA) {
+        if (error) return cb(error);
+        readSHA(target, treeSHA, 'tree', cb);
+      });
+    } else if (type == 'tree') {
+      getTree(target, sha, function (error, tree) {
+        if (error) return cb(error);
+        if (tree.trim().split(/\n/).length > 1) {
+          cb(null, tree); 
+        } else {
+          var info = tree.split(/\s+/);
+          return readSHA('', info[2], info[1], cb);
+        }
+      });
+    } else if (type == 'blob') {
+      exec('git cat-file -p '+sha, {cwd:source}, function (error, stdout, stderr) {
+        cb(stderr, stdout);
+      });
+    }
+  });
+
+}
+
+function getType(sha, type, cb) {
+  if (!type) {
+    exec('git cat-file -t '+sha, {cwd:source}, function (error, stdout, stderr) {
+      cb(stderr, stdout.trim());
+    });
+  } else {
+    cb(null, type);
+  }
+};
+
+function parseCommit(sha, cb) {
+  exec('git cat-file -p '+sha, {cwd:source}, function (error, stdout, stderr) {
+    var treeSHA = stdout.split(/\s+/)[1]; 
+    cb(stderr, treeSHA);
+  });
+}
+
+function getTree(target, sha, cb) {
+  exec('git ls-tree '+sha+" "+target, {cwd:source}, function (error, stdout, stderr) {
+    if (!stdout) cb('no object found for '+target);
+    cb(stderr, stdout);
+  });
+}
+
+var sha = process.argv[3];
+var target = process.argv[4];
+
+var sTime = Date.now();
+
+readSHA(target, sha, function (error, data) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log(data);
+  }
+  debug("finished in " + (Date.now() - sTime) + " ms");
+});

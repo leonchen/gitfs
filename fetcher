@@ -6,8 +6,8 @@ end
 
 ram_source = '/Volumes/RamDisk/sr'
 ext_source = '/Volumes/RamDisk/new'
-#hd_source = '/Users/chenronghua/workspace/scarecrow-rules' 
-hd_source = '/Users/chenronghua/workspace/front' 
+hd_source = '/Users/chenronghua/workspace/scarecrow-rules' 
+#hd_source = '/Users/chenronghua/workspace/front' 
 
 source = ARGV[0]
 source = ram_source if source == 'ram'
@@ -34,7 +34,6 @@ def readSHA(target, sha, type=nil)
     # blob
     info = tree.split(/\s+/)
     return readSHA(nil, info[2], info[1])
-    raise RuntimeError.new("no object found for #{t}")
   elsif type == 'blob'
     return `git cat-file -p #{sha}`
   end

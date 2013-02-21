@@ -6,8 +6,8 @@ end
 
 ram_source = '/Volumes/RamDisk/sr'
 ext_source = '/Volumes/RamDisk/new'
-#hd_source = '/Users/chenronghua/workspace/scarecrow-rules' 
-hd_source = '/Users/chenronghua/workspace/front' 
+hd_source = '/Users/chenronghua/workspace/scarecrow-rules' 
+#hd_source = '/Users/chenronghua/workspace/front' 
 
 source = ARGV[0]
 source = ram_source if source == 'ram'
