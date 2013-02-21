@@ -5,13 +5,10 @@ def debug(info)
 end
 
 ram_source = '/Volumes/RamDisk/sr'
-ext_source = '/Volumes/RamDisk/new'
 hd_source = '/Users/chenronghua/workspace/scarecrow-rules' 
-#hd_source = '/Users/chenronghua/workspace/front' 
 
 source = ARGV[0]
 source = ram_source if source == 'ram'
-source = ext_source if source == 'ext'
 source = hd_source if source == 'hd'
 
 Dir.chdir(source)
@@ -32,4 +29,4 @@ puts readSHA(target, sha)
 
 end_time = Time.now.to_f
 
-debug "finished in #{end_time - start_time} seconds"
+debug "finished in #{((end_time - start_time)*1000).to_i} ms"

@@ -1,17 +1,14 @@
 #! /usr/bin/env ruby
 
 def debug(info)
-  puts "DEBUG: #{info.is_a?(String) ? info : info.inspect}"
+  #puts "DEBUG: #{info.is_a?(String) ? info : info.inspect}"
 end
 
 ram_source = '/Volumes/RamDisk/sr'
-ext_source = '/Volumes/RamDisk/new'
 hd_source = '/Users/chenronghua/workspace/scarecrow-rules' 
-#hd_source = '/Users/chenronghua/workspace/front' 
 
 source = ARGV[0]
 source = ram_source if source == 'ram'
-source = ext_source if source == 'ext'
 source = hd_source if source == 'hd'
 
 Dir.chdir(source)
@@ -27,7 +24,7 @@ def readSHA(target, sha, type=nil)
     tree = commit.split(/\s+/)[1]
     return readSHA(target, tree, 'tree')
   elsif type == 'tree'
-    tree = `git ls-tree #{sha} #{target}`
+    tree = `git ls-tree -r #{sha} #{target}`
     raise RuntimeError.new("no object found for #{target}") if tree.empty?
     # tree
     return tree if tree.split(/\n/).length > 1
@@ -45,9 +42,12 @@ target = ARGV[2]
 
 start_time = Time.now.to_f
 
-puts readSHA(target, sha)
+100.times do |i|
+  readSHA(target, sha)
+  puts i
+end
 
 
 end_time = Time.now.to_f
 
-debug "finished in #{end_time - start_time} seconds"
+debug "finished in #{((end_time - start_time)*1000).to_i} ms"

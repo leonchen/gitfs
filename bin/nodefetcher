@@ -1,11 +1,11 @@
 #! /usr/bin/env node
-var exec = require('child_process').exec
+var exec = require('child_process').exec;
 
 function debug(info) {
   console.log("DEBUG: ", info);
 }
 
-var ram_source = '/Volumes/RamDisk/sr';
+var ram_source = '/Volumes/RamDisk/sr/packages';
 var ext_source = '/Volumes/RamDisk/new';
 var hd_source = '/Users/chenronghua/workspace/scarecrow-rules'; 
 //var hd_source = '/Users/chenronghua/workspace/front' 
@@ -34,11 +34,16 @@ function readSHA(target, sha, type, cb) {
     } else if (type == 'tree') {
       getTree(target, sha, function (error, tree) {
         if (error) return cb(error);
-        if (tree.trim().split(/\n/).length > 1) {
+        var subTrees = tree.split(/\n/).length;
+        if (subTrees == 0 || subTrees > 1) {
           cb(null, tree); 
         } else {
           var info = tree.split(/\s+/);
-          return readSHA('', info[2], info[1], cb);
+          if (info[1] == 'tree') {
+            return listTree(info[2], cb);
+          } else {
+            return readSHA(target, info[2], info[1], cb);
+          }
         }
       });
     } else if (type == 'blob') {
@@ -68,8 +73,15 @@ function parseCommit(sha, cb) {
 }
 
 function getTree(target, sha, cb) {
+  target = target.replace(/\/$/, '');
   exec('git ls-tree '+sha+" "+target, {cwd:source}, function (error, stdout, stderr) {
     if (!stdout) cb('no object found for '+target);
+    cb(stderr, stdout.trim());
+  });
+}
+
+function listTree(sha, cb) {
+  exec('git cat-file -p '+sha, {cwd:source}, function (error, stdout, stderr) {
     cb(stderr, stdout);
   });
 }
@@ -79,11 +91,16 @@ var target = process.argv[4];
 
 var sTime = Date.now();
 
+//for (var i=0; i<100; i++) {
+//(function (i) {
 readSHA(target, sha, function (error, data) {
   if (error) {
     console.error(error);
   } else {
     console.log(data);
+    //console.log(i);
   }
   debug("finished in " + (Date.now() - sTime) + " ms");
 });
+//})(i);
+//}

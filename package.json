@@ -1,0 +1,9 @@
+{
+  "name": "gitplus",
+  "description": "git data fetcher nodejs",
+  "version": "0.0.1",
+  "private": false,
+  "dependencies": {
+    "mochiscript": ""
+  }
+}
