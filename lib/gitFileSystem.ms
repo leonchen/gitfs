@@ -49,8 +49,11 @@ export class GitFileSystem {
           if (error) return cb(error);
           self.readObj(treeSHA, target, cb);
         });
-      } else {
+      } else if (type == 'tree') {
         self.readObj(sha, target, cb);
+      } else {
+        if (target instanceof Function) cb = target;
+        self.readBlob(sha, cb);
       }
     });
   };
@@ -127,7 +130,7 @@ export class GitFileSystem {
       tree.forEach(function (t, idx, tree) {
         if (t[1] == 'blob') {
           count++;
-          self.readBlob(t, function (err, data) {
+          self.readBlob(t[2], function (err, data) {
             tree[idx].push(data);
             finish(err);
           });
@@ -137,12 +140,11 @@ export class GitFileSystem {
     });
   }
 
-  function readBlob(blob, cb) {
-    var sha = blob[2];
-    this.debugLog("read blob - sha:"+sha+", obj:"+blob[4]);
+  function readBlob(sha, cb) {
+    this.debugLog("read blob - sha:"+sha);
     exec('git cat-file blob '+sha, { cwd: this.repo }, function (error, stdout, stderr) {
       if (error || stderr) return cb(error || stderr);
-      cb(stderr, stdout);
+      cb(null, stdout);
     });
   }
 

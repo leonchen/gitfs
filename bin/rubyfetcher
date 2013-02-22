@@ -39,10 +39,11 @@ end
 
 sha = ARGV[1]
 target = ARGV[2]
+times = (ARGV[3] || 1).to_i
 
 start_time = Time.now.to_f
 
-100.times do |i|
+times.times do |i|
   readSHA(target, sha)
   puts i
 end
