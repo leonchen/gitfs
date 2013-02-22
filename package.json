@@ -1,6 +1,6 @@
 {
-  "name": "gitplus",
-  "description": "git data fetcher nodejs",
+  "name": "gitfs",
+  "description": "git data fetcher",
   "version": "0.0.1",
   "private": false,
   "dependencies": {

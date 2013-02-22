@@ -14,12 +14,19 @@ export class GitFileSystem {
     this.repo = repo;
   };
 
+  function sha(ref, cb) {
+    exec('git show-ref '+ref, { cwd: this.repo }, function (error, stdout, stderr) {
+      if (error || stderr) return cb(error || stderr);
+      cb(null, stdout.split(/\s+/)[0]);
+    });
+  }
+
   function read(sha, target, type, cb) {
     if (type instanceof Function) {
       cb = type;
       type = null;
     }
-    this.debugLog("read - sha:"+sha+", target:"+target);
+    this.debugLog("read - sha:"+sha+", target:"+target+" type:"+type);
     this.getType(sha, type, function (err, type) {
       if (err) return cb(err);
       if (type == 'tag') {
@@ -43,7 +50,7 @@ export class GitFileSystem {
       cb = type;
       type = null;
     }
-    this.debugLog("list - sha:"+sha+", target:"+target);
+    this.debugLog("list - sha:"+sha+", target:"+target+" type:"+type);
     this.getType(sha, type, function (err, type) {
       if (err) return cb(err);
       if (type == 'tag') {
@@ -61,13 +68,6 @@ export class GitFileSystem {
       }
     });
   };
-
-  function getSHA(ref, cb) {
-    exec('git show-ref '+ref, { cwd: this.repo }, function (error, stdout, stderr) {
-      if (error || stderr) return cb(error || stderr);
-      cb(null, stdout.split(/\s+/)[0]);
-    });
-  }
 
   function getType(sha, type, cb) {
     this.debugLog("get type - sha:"+sha+", type:"+type);
@@ -116,7 +116,7 @@ export class GitFileSystem {
       tree.forEach(function (t, idx, tree) {
         if (t[1] == 'blob') {
           count++;
-          self.readBlob(t[2], function (err, data) {
+          self.readBlob(t, function (err, data) {
             tree[idx].push(data);
             finish(err);
           });
@@ -126,8 +126,9 @@ export class GitFileSystem {
     });
   }
 
-  function readBlob(sha, cb) {
-    this.debugLog("read blob - sha:"+sha);
+  function readBlob(blob, cb) {
+    var sha = blob[2];
+    this.debugLog("read blob - sha:"+sha+", obj:"+blob[3]);
     exec('git cat-file -p '+sha, { cwd: this.repo }, function (error, stdout, stderr) {
       if (error || stderr) return cb(error || stderr);
       cb(stderr, stdout);

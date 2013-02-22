@@ -12,7 +12,7 @@ var show = function () {
 };
 
 // version
-gf.getSHA('HEAD', function (err, sha) {
+gf.sha('HEAD', function (err, sha) {
   if (err) return show(err);
   show('HEAD', sha);
   gf.list(sha, 'packages', function (err, tree) {
@@ -22,7 +22,7 @@ gf.getSHA('HEAD', function (err, sha) {
 }); 
 
 // head
-gf.getSHA('feature/crow', function (err, sha) {
+gf.sha('feature/crow', function (err, sha) {
   console.log("---------", sha);
   if (err) return show(err);
   gf.read(sha, 'packages/poi.us/Address.js', function (err, tree) {
@@ -34,7 +34,7 @@ gf.getSHA('feature/crow', function (err, sha) {
 }); 
 
 // tag
-gf.getSHA('aaa', function (err, sha) {
+gf.sha('aaa', function (err, sha) {
   if (err) return show(err);
   gf.read(sha, 'packages/poi.us/Address.js', function (err, tree) {
     if (err) return console.log(err);

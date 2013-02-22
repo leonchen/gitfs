@@ -1,0 +1,39 @@
+#! /usr/bin/env node
+
+ 
+//samples:
+//
+//DEBUG=true gitfs sha (HEAD|<branch>|<tag>)
+//
+//gitfs list <sha> .
+//gitfs list <sha> dir
+//
+//gitfs read <sha> file
+//gitfs read <sha> dir/file
+//gitfs read <sha> dir/**/*.xml
+
+
+var exec = require('child_process').exec
+var GF = require('../');
+
+var repo = process.cwd();
+
+exec('git status', {cwd: repo}, function (err, stdout, stderr) {
+  if (err || stderr) return console.error(repo+' is not a git repository');
+
+  var gf = new GF({
+    repo: repo,
+    debug: process.env['DEBUG']
+  });
+
+console.log(process.argv);
+  var action = process.argv[2];
+  var args = process.argv.slice(3);
+
+  var cb = function (err, data) {
+    if (err) console.log(err);
+    console.log(data.length);
+  };
+  args.push(cb);
+  gf[action].apply(gf, args);
+});
