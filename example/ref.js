@@ -23,7 +23,6 @@ gf.sha('HEAD', function (err, sha) {
 
 // head
 gf.sha('feature/crow', function (err, sha) {
-  console.log("---------", sha);
   if (err) return show(err);
   gf.read(sha, 'packages/poi.us/Address.js', function (err, tree) {
     if (err) return console.log(err);

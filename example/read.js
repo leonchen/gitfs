@@ -17,7 +17,8 @@ gf.read('HEAD', 'packages/poi.us/Address.js', function (err, tree) {
     return t[1] == 'blob' ? [t[4], t[5].length] : [t[4], null];
   }));
 }); 
-
+/*
+ * wildcard matching doesn't work
 gf.read('HEAD', 'packages/poi.us/*.js', function (err, tree) {
   if (err) return console.log(err);
   show('packages/poi.us/*.js', tree.map(function (t) { 
@@ -31,6 +32,7 @@ gf.read('HEAD', 'packages/**/*.yml', function (err, tree) {
     return t[1] == 'blob' ? [t[4], t[5].length] : [t[4], null];
   }));
 }); 
+*/
 
 gf.read('HEAD', 'packages/poi.us', function (err, tree) {
   if (err) return console.log(err);

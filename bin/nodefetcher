@@ -5,17 +5,9 @@ function debug(info) {
   //console.log("DEBUG: ", info);
 }
 
-var ram_source = '/Volumes/RamDisk/sr';
-var ext_source = '/Volumes/RamDisk/new';
-var hd_source = '/Users/chenronghua/workspace/scarecrow-rules'; 
-//var hd_source = '/Users/chenronghua/workspace/front' 
+source = '/Volumes/RamDisk/sr';
 
-console.log(process.argv);
-
-var source = process.argv[2];
-if (source == 'ram') source = ram_source;
-if (source == 'ext') source = ext_source;
-if (source == 'hd') source = hd_source;
+//console.log(process.argv);
 
 function readSHA(target, sha, type, cb) {
   if (type instanceof Function) {
@@ -86,9 +78,9 @@ function listTree(sha, cb) {
   });
 }
 
-var sha = process.argv[3];
-var target = process.argv[4];
-var times = parseInt(process.argv[5] || 1);
+var sha = process.argv[2];
+var target = process.argv[3];
+var times = parseInt(process.argv[4] || 1);
 
 var sTime = Date.now();
 

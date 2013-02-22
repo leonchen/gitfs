@@ -4,12 +4,7 @@ def debug(info)
   #puts "DEBUG: #{info.is_a?(String) ? info : info.inspect}"
 end
 
-ram_source = '/Volumes/RamDisk/sr'
-hd_source = '/Users/chenronghua/workspace/scarecrow-rules' 
-
-source = ARGV[0]
-source = ram_source if source == 'ram'
-source = hd_source if source == 'hd'
+source = '/Volumes/RamDisk/sr'
 
 Dir.chdir(source)
 debug "git repo: #{source}"
@@ -37,9 +32,9 @@ def readSHA(target, sha, type=nil)
 end
 
 
-sha = ARGV[1]
-target = ARGV[2]
-times = (ARGV[3] || 1).to_i
+sha = ARGV[0]
+target = ARGV[1]
+times = (ARGV[2] || 1).to_i
 
 start_time = Time.now.to_f
 

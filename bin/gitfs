@@ -10,7 +10,6 @@
 // 3. read blob
 //  gitfs read <sha> file
 //  gitfs read <sha> dir/file
-//  gitfs read <sha> "dir/**/*.xml"
 // 4. raw
 //  gitfs raw "<git command>"
 
