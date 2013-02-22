@@ -3,6 +3,17 @@
   "description": "git data fetcher",
   "version": "0.0.1",
   "private": false,
+  "licenses": [ { "type": "MIT" }],
+  "author": "Leon Chen",
+  "homepage": "https://github.com/leonchen/gitfs",
+  "keywords": ["git", "file system"],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:leonchen/gitfs.git"
+  },
+  "bin": {
+    "gitfs": "./bin/gitfs"
+  },
   "dependencies": {
     "mochiscript": ""
   }
