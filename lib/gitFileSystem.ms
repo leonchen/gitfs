@@ -14,6 +14,7 @@ export class GitFileSystem {
     this.repo = repo;
   };
 
+  // output sha string
   function sha(ref, cb) {
     exec('git show-ref '+ref, { cwd: this.repo }, function (error, stdout, stderr) {
       if (error || stderr) return cb(error || stderr);
@@ -21,6 +22,15 @@ export class GitFileSystem {
     });
   }
 
+  // output the raw output of the git command
+  function raw(command, cb) {
+    exec(command, { cwd: this.repo }, function (error, stdout, stderr) {
+      if (error || stderr) return cb(error || stderr);
+      cb(null, stdout);
+    });
+  }
+
+  // output lines with: mod type sha length name data
   function read(sha, target, type, cb) {
     if (type instanceof Function) {
       cb = type;
@@ -45,6 +55,7 @@ export class GitFileSystem {
     });
   };
 
+  // output lines with: mod type sha length name
   function ls(sha, target, type, cb) {
     if (type instanceof Function) {
       cb = type;
@@ -128,8 +139,8 @@ export class GitFileSystem {
 
   function readBlob(blob, cb) {
     var sha = blob[2];
-    this.debugLog("read blob - sha:"+sha+", obj:"+blob[3]);
-    exec('git cat-file -p '+sha, { cwd: this.repo }, function (error, stdout, stderr) {
+    this.debugLog("read blob - sha:"+sha+", obj:"+blob[4]);
+    exec('git cat-file blob '+sha, { cwd: this.repo }, function (error, stdout, stderr) {
       if (error || stderr) return cb(error || stderr);
       cb(stderr, stdout);
     });
@@ -143,13 +154,13 @@ export class GitFileSystem {
       var tree = self.parseTreeOut(out);
       if (tree.length == 0 || tree.length > 1) return cb(null, tree);
       if (tree[0][1] == 'blob') return cb(null, tree);
-      if (tree[0][3] == target) return self.listObj(tree[0][2], '', cb);
+      if (tree[0][4] == target) return self.listObj(tree[0][2], '', cb);
     });
   }
 
   function listTree(sha, target, cb) {
     this.debugLog("list tree - sha:"+sha+", target:"+target);
-    exec('git ls-tree '+sha+" "+target, { cwd: this.repo }, function (error, stdout, stderr) {
+    exec('git ls-tree -l '+sha+" "+target, { cwd: this.repo }, function (error, stdout, stderr) {
       if (error || stderr) return cb(error || stderr);
       if (!stdout) cb('no object found for '+target);
       cb(null, stdout);

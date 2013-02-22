@@ -10,7 +10,9 @@
 // 3. read blob
 //  gitfs read <sha> file
 //  gitfs read <sha> dir/file
-//  gitfs read <sha> dir/**/*.xml
+//  gitfs read <sha> "dir/**/*.xml"
+// 4. raw
+//  gitfs raw "<git command>"
 
 
 var exec = require('child_process').exec
@@ -18,22 +20,33 @@ var GF = require('../');
 
 var repo = process.cwd();
 
+function output(data) {
+  if (data instanceof Array) {
+    console.log(data.map(function(d) {
+      return (d instanceof Array) ? d.join("\t") : d;
+    }).join("\n"));
+  } else {
+    console.log(data);
+  }
+}
+
 exec('git status', {cwd: repo}, function (err, stdout, stderr) {
   if (err || stderr) return console.error(repo+' is not a git repository');
 
+  var debug = process.env['DEBUG'];
   var gf = new GF({
     repo: repo,
-    debug: process.env['DEBUG']
+    debug: debug 
   });
 
-  console.log("RUN with argv:", process.argv);
+  if (debug) console.log("RUN with argv:", process.argv);
   var action = process.argv[2];
   var args = process.argv.slice(3);
-
   var cb = function (err, data) {
     if (err) return console.log(err);
-    console.log(data);
+    output(data);
   };
+
   args.push(cb);
   gf[action].apply(gf, args);
 });

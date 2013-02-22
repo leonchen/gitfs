@@ -17,7 +17,7 @@ gf.sha('HEAD', function (err, sha) {
   show('HEAD', sha);
   gf.ls(sha, 'packages', function (err, tree) {
     if (err) return show(err);
-    show('packages', tree.map(function (t) { return t[3]; }));
+    show('packages', tree.map(function (t) { return t[4]; }));
   }); 
 }); 
 
@@ -28,7 +28,7 @@ gf.sha('feature/crow', function (err, sha) {
   gf.read(sha, 'packages/poi.us/Address.js', function (err, tree) {
     if (err) return console.log(err);
     show('packages/poi.us/Address.js', tree.map(function (t) { 
-      return t[1] == 'blob' ? [t[3], t[4].length] : [t[3], null];
+      return t[1] == 'blob' ? [t[4], t[5].length] : [t[4], null];
     }));
   }); 
 }); 
@@ -39,7 +39,7 @@ gf.sha('aaa', function (err, sha) {
   gf.read(sha, 'packages/poi.us/Address.js', function (err, tree) {
     if (err) return console.log(err);
     show('packages/poi.us/Address.js', tree.map(function (t) { 
-      return t[1] == 'blob' ? [t[3], t[4].length] : [t[3], null];
+      return t[1] == 'blob' ? [t[4], t[5].length] : [t[4], null];
     }));
   }); 
 }); 

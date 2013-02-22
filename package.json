@@ -1,7 +1,7 @@
 {
   "name": "gitfs",
   "description": "git data fetcher",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": false,
   "licenses": [ { "type": "MIT" }],
   "author": "Leon Chen",
