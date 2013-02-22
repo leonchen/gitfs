@@ -45,18 +45,18 @@ export class GitFileSystem {
     });
   };
 
-  function list(sha, target, type, cb) {
+  function ls(sha, target, type, cb) {
     if (type instanceof Function) {
       cb = type;
       type = null;
     }
-    this.debugLog("list - sha:"+sha+", target:"+target+" type:"+type);
+    this.debugLog("ls - sha:"+sha+", target:"+target+" type:"+type);
     this.getType(sha, type, function (err, type) {
       if (err) return cb(err);
       if (type == 'tag') {
         self.getTagCommit(sha, function (error, commitSHA) {
           if (error) return cb(error);
-          self.list(commitSHA, target, 'commit', cb);
+          self.ls(commitSHA, target, 'commit', cb);
         });
       } else if (type == 'commit') {
         self.getCommitTree(sha, function (error, treeSHA) {

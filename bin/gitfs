@@ -2,15 +2,15 @@
 
  
 //samples:
-//
-//DEBUG=true gitfs sha (HEAD|<branch>|<tag>)
-//
-//gitfs list <sha> .
-//gitfs list <sha> dir
-//
-//gitfs read <sha> file
-//gitfs read <sha> dir/file
-//gitfs read <sha> dir/**/*.xml
+// 1. get sha 
+//  DEBUG=true gitfs sha (HEAD|<branch>|<tag>)
+// 2. list tree
+//  gitfs ls <sha> .
+//  gitfs ls <sha> dir
+// 3. read blob
+//  gitfs read <sha> file
+//  gitfs read <sha> dir/file
+//  gitfs read <sha> dir/**/*.xml
 
 
 var exec = require('child_process').exec

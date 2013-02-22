@@ -15,7 +15,7 @@ var show = function () {
 gf.sha('HEAD', function (err, sha) {
   if (err) return show(err);
   show('HEAD', sha);
-  gf.list(sha, 'packages', function (err, tree) {
+  gf.ls(sha, 'packages', function (err, tree) {
     if (err) return show(err);
     show('packages', tree.map(function (t) { return t[3]; }));
   }); 
