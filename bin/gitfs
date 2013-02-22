@@ -26,13 +26,13 @@ exec('git status', {cwd: repo}, function (err, stdout, stderr) {
     debug: process.env['DEBUG']
   });
 
-console.log(process.argv);
+  console.log("RUN with argv:", process.argv);
   var action = process.argv[2];
   var args = process.argv.slice(3);
 
   var cb = function (err, data) {
-    if (err) console.log(err);
-    console.log(data.length);
+    if (err) return console.log(err);
+    console.log(data);
   };
   args.push(cb);
   gf[action].apply(gf, args);
