@@ -1,4 +1,5 @@
 var exec = require('child_process').exec;
+var mm = require('minimatch');
 
 export class GitFileSystem {
   function initialize(options) {
@@ -17,7 +18,8 @@ export class GitFileSystem {
   // output sha string
   function sha(ref, cb) {
     exec('git show-ref '+ref, { cwd: this.repo }, function (error, stdout, stderr) {
-      if (error || stderr) return cb(error || stderr);
+      //if (error || stderr) return cb(error || stderr);
+      if (!stdout) cb('no sha found for '+ref);
       cb(null, stdout.split(/\s+/)[0]);
     });
   }
@@ -30,7 +32,15 @@ export class GitFileSystem {
     });
   }
 
-  // output lines with: mod type sha length name data
+  function readFiles(sha, files, cb) {
+    this.read(sha, files, cb);
+  }
+
+  function readFile(sha, file, cb) {
+    this.read(sha, file, cb);
+  }
+
+  // output lines with: mod type sha name data
   function read(sha, target, type, cb) {
     if (type instanceof Function) {
       cb = type;
@@ -109,7 +119,7 @@ export class GitFileSystem {
     exec('git cat-file -p '+sha, { cwd: this.repo }, function (error, stdout, stderr) {
       if (error || stderr) return cb(error || stderr);
       var treeSHA = stdout.split(/\s+/)[1]; 
-      cb(stderr, treeSHA);
+      cb(null, treeSHA);
     });
   }
 
@@ -122,21 +132,22 @@ export class GitFileSystem {
       if (tree.length < 1) return cb(null, []);
 
       var count = 0;
+      var output = [];
       var finish = function (err) {
         count--;
-        if (err) cb(err);
-        if (count <= 0) cb(null, tree);
+        if (err) return cb(err);
+        if (count <= 0) cb(null, output);
       };
       tree.forEach(function (t, idx, tree) {
-        if (t[1] == 'blob') {
+        if (t[1] == 'blob' && mm(t[3], target)) {
           count++;
           self.readBlob(t[2], function (err, data) {
-            tree[idx].push(data);
+            output.push([t[3], data]);
             finish(err);
           });
         }
       });
-      if (count == 0) cb(null, tree);
+      if (count == 0) cb(null, output);
     });
   }
 
@@ -156,15 +167,23 @@ export class GitFileSystem {
       var tree = self.parseTreeOut(out);
       if (tree.length == 0 || tree.length > 1) return cb(null, tree);
       if (tree[0][1] == 'blob') return cb(null, tree);
-      if (tree[0][4] == target) return self.listObj(tree[0][2], '', cb);
+      if (tree[0][3] == target) return self.listTreeBySHA(tree[0][2], cb);
     });
   }
 
   function listTree(sha, target, cb) {
     this.debugLog("list tree - sha:"+sha+", target:"+target);
-    exec('git ls-tree -l '+sha+" "+target, { cwd: this.repo }, function (error, stdout, stderr) {
+    exec('git ls-tree '+sha+" "+target, { cwd: this.repo }, function (error, stdout, stderr) {
       if (error || stderr) return cb(error || stderr);
       if (!stdout) cb('no object found for '+target);
+      cb(null, stdout);
+    });
+  }
+
+  function listTreeBySHA(sha, cb) {
+    this.debugLog("list tree by sha - sha:"+sha);
+    exec('git cat-file -p '+sha, { cwd: this.repo }, function (error, stdout, stderr) {
+      if (error || stderr) return cb(error || stderr);
       cb(null, stdout);
     });
   }

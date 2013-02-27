@@ -1,7 +1,7 @@
 {
   "name": "gitfs",
   "description": "git data fetcher",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "private": false,
   "licenses": [ { "type": "MIT" }],
   "author": "Leon Chen",
@@ -15,6 +15,7 @@
     "gitfs": "./bin/gitfs"
   },
   "dependencies": {
-    "mochiscript": ""
+    "mochiscript": "",
+    "minimatch": ""
   }
 }
