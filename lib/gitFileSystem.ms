@@ -7,8 +7,13 @@ export class GitFileSystem {
     this.debug = options.debug;
   };
 
-  function debugLog(info) {
-    if (this.debug) console.log("DEBUG: ", info);
+  function debugLog() {
+    if (!this.debug) return;
+    var args = [];
+    for (var i=0, p; p=arguments[i++];) {
+      args.push(p);
+    }
+    console.log.apply(console, ["DEBUG: "].concat(args));
   };
 
   function setRepo(repo) {
@@ -38,6 +43,10 @@ export class GitFileSystem {
 
   function readFile(sha, file, cb) {
     this.read(sha, file, cb);
+  }
+
+  function cat(sha, target, type, cb) {
+    return this.read(sha, target, type, cb);
   }
 
   // output lines with: mod type sha name data
@@ -126,9 +135,8 @@ export class GitFileSystem {
   function readObj(sha, target, cb) {
     this.debugLog("read obj - sha:"+sha+", target:"+target);
     target = target.replace(/\/$/, '');
-    this.listTree(sha, target, function (err, out) {
+    this.listTree(sha, target, function (err, tree) {
       if (err) return cb(err);
-      var tree = self.parseTreeOut(out);
       if (tree.length < 1) return cb(null, []);
 
       var count = 0;
@@ -162,9 +170,8 @@ export class GitFileSystem {
   function listObj(sha, target, cb) {
     this.debugLog("list obj - sha:"+sha+", target:"+target);
     target = target.replace(/\/$/, '');
-    this.listTree(sha, target, function (err, out) {
+    this.listTree(sha, target, function (err, tree) {
       if (err) return cb(err);
-      var tree = self.parseTreeOut(out);
       if (tree.length == 0 || tree.length > 1) return cb(null, tree);
       if (tree[0][1] == 'blob') return cb(null, tree);
       if (tree[0][3] == target) return self.listTreeBySHA(tree[0][2], cb);
@@ -173,10 +180,28 @@ export class GitFileSystem {
 
   function listTree(sha, target, cb) {
     this.debugLog("list tree - sha:"+sha+", target:"+target);
-    exec('git ls-tree '+sha+" "+target, { cwd: this.repo }, function (error, stdout, stderr) {
+    var wildcards = target.match(/^([^*]*\/)?([^\/]*\*.*)$/), path, wc, recurse;
+    if (wildcards) {
+      path = wildcards[1];
+      wc = wildcards[2];
+      recurse = "-r ";
+    } else {
+      path = target;
+      wc = null;
+      recurse = "";
+    }
+    this.debugLog("parsed target:", path, ", ", wc); 
+    exec('git ls-tree '+recurse+sha+" "+path, { cwd: this.repo }, function (error, stdout, stderr) {
       if (error || stderr) return cb(error || stderr);
       if (!stdout) cb('no object found for '+target);
-      cb(null, stdout);
+
+      var tree = self.parseTreeOut(stdout);
+      if (!wildcards) return cb(null, tree);
+      var output = [];
+      foreach (var obj in tree) {
+        if (mm(obj[3], target)) output.push(obj); 
+      }
+      cb(null, output);
     });
   }
 
