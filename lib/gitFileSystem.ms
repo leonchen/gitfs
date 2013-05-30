@@ -49,6 +49,10 @@ export class GitFileSystem {
     return this.read(sha, target, type, cb);
   }
 
+  function diff(sha, target, cb) {
+    this.raw('git diff ' + sha + "~1 " + sha + " " + target, cb);
+  }
+
   // output lines with: mod type sha name data
   function read(sha, target, type, cb) {
     if (type instanceof Function) {
